@@ -10,6 +10,7 @@ import ViewJobs from "../pages/ViewJobs";
 import NotAllowed from "../pages/not-allowed";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RestrictedRoute from "./auth/RestrictedRoute";
+import Profile from "../pages/profile";
 
 export const router = createBrowserRouter([
   {
@@ -78,6 +79,10 @@ export const router = createBrowserRouter([
       {
         path: "not-allowed",
         element: <NotAllowed />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },

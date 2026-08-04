@@ -533,19 +533,19 @@ class DocumentProcessingService:
             logger(level='INFO', status_code=200, message=f"decoded_qr: {qr_data}", endpoint='get_final_irn')
 
             if doc_no and invoice_no:
-                distance_inv = Levenshtein.distance(doc_no, invoice_no)
+                distance_inv = Levenshtein.distance(str(doc_no), str(invoice_no))
                 logger(level='INFO', status_code=200, message=f"Distance Invoice: {distance_inv}", endpoint='get_final_irn')
                 if distance_inv <= 2:
                     invoice_no = doc_no
                     
             if seller_gstin and dealer_gstin:
-                distance_gstin = Levenshtein.distance(seller_gstin, dealer_gstin)
+                distance_gstin = Levenshtein.distance(str(seller_gstin), str(dealer_gstin))
                 logger(level='INFO', status_code=200, message=f"Distance GSTIN: {distance_gstin}", endpoint='get_final_irn')
                 if distance_gstin <= 2:
                     dealer_gstin = seller_gstin
                     
             if buyer_gstin and hiib_gstin:
-                distance_hiib_gstin = Levenshtein.distance(buyer_gstin, hiib_gstin)
+                distance_hiib_gstin = Levenshtein.distance(str(buyer_gstin), str(hiib_gstin))
                 logger(level='INFO', status_code=200, message=f"Distance GSTIN: {distance_hiib_gstin}", endpoint='get_final_irn')
                 if distance_hiib_gstin <= 2:
                     hiib_gstin = buyer_gstin
@@ -555,7 +555,7 @@ class DocumentProcessingService:
                     return qr_irn, invoice_no, dealer_gstin, hiib_gstin, final_quantity
                              
             if qr_irn and irn:
-                distance_irn = Levenshtein.distance(qr_irn, irn)
+                distance_irn = Levenshtein.distance(str(qr_irn), str(irn))
                 logger(level='INFO', status_code=200, message=f"Distance IRN: {distance_irn}", endpoint='get_final_irn')
                 if distance_irn < 4:
                     return qr_irn, invoice_no, dealer_gstin, hiib_gstin, final_quantity
@@ -956,6 +956,8 @@ class DocumentProcessingService:
             HTTPException: If any error occurs during processing.
         """
         try:
+            from app.config import SessionLocal
+            db = SessionLocal()
             time1 = datetime.now()
             s3 = self.s3_resource
 
@@ -1208,21 +1210,32 @@ class DocumentProcessingService:
                 JobDocumentService.process_job_completion(job_id, db)
                 
         except Exception as e:
+            logger(level='CRITICAL', status_code=500, message=f"Error extracting data: {e}", endpoint='extract_data')
             document_data = db.query(ModelDocuments).filter(ModelDocuments.document_id == document_id).first()
-            setattr(document_data, "status", Status.Failed)
-            setattr(document_data, "updated_at", datetime.now())
-            db.add(document_data)
-            db.commit()
+            if document_data:
+                setattr(document_data, "status", Status.Failed)
+                setattr(document_data, "updated_at", datetime.now())
+                db.add(document_data)
+                db.commit()
 
             job = db.query(ModelJobs).filter(ModelJobs.id == job_id).first()
-            setattr(job, "status", Status.Failed)
-            setattr(job, "updated_at", datetime.now())
-            setattr(job, "job_end_time", datetime.now())
-            db.add(job)
-            db.commit()
+            if job:
+                setattr(job, "status", Status.Failed)
+                setattr(job, "updated_at", datetime.now())
+                setattr(job, "job_end_time", datetime.now())
+                db.add(job)
+                db.commit()
             
-            JobDocumentService.process_job_completion(job_id, db)
-            logger(level='CRITICAL', status_code=500, message=f"Error extracting data: {e}", endpoint='extract_data')
-            handle_error("exception_error","extract_data",f"Error extracting data: {e}")
+            try:
+                JobDocumentService.process_job_completion(job_id, db)
+            except Exception as inner_e:
+                logger(level='CRITICAL', status_code=500, message=f"Error in process_job_completion: {inner_e}", endpoint='extract_data')
+
+            try:
+                handle_error("exception_error","extract_data",f"Error extracting data: {e}")
+            except Exception:
+                pass # Swallowing HTTPException in background task so it doesn't crash the worker thread silently
+        finally:
+            db.close()
 
 document_processing_service = DocumentProcessingService()

@@ -112,6 +112,13 @@ export default function AccountMenu({ data, profileData }) {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
+        <MenuItem onClick={() => handleClose("/dashboard/profile")}>
+          <ListItemIcon>
+            <AccountCircleIcon sx={{ mr: 2 }} />
+          </ListItemIcon>
+          Profile
+        </MenuItem>
+        <Divider />
         <MenuItem onClick={() => handleClose("/")}>
           <ListItemIcon>
             <Logout sx={{ mr: 2 }} />

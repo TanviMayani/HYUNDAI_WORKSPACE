@@ -19,7 +19,7 @@ axiosInstance.interceptors.request.use(
     const userSessionActive = sessionStorage.getItem("token");
     const decryptedToken = userSessionActive && tokenDecrypt(userSessionActive);
     if (config.headers) {
-      if (!config.headers["Content-Type"]) {
+      if (!config.headers["Content-Type"] && !(config.data instanceof FormData)) {
         config.headers["Content-Type"] = "application/json";
       }
       // config.withCredentials = true;

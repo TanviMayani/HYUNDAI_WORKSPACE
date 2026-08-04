@@ -7,6 +7,7 @@ export const COMMON_API_URL = {
   forgotPassword: `${backendUrl}/forgot-password`,
   resetPassword: `${backendUrl}/reset-password`,
   getUserProfile: `${backendUrl}/v1/idp/members/profile`,
+  updateUserProfile: `${backendUrl}/v1/idp/members/profile`,
   getJobs: `${backendUrl}/job`,
   searchJobs: `${backendUrl}/job/search/`,
   listMethod: `${backendUrl}/job/method/`,
