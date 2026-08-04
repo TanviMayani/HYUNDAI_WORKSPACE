@@ -1,0 +1,38 @@
+variables:
+  IMAGE_NAME: $IMAGE_NAME
+  IMAGE_TAG: $IMAGE_TAG
+stages:
+  - build
+  - deploy
+
+build_image:
+  stage: build
+  only:
+    - dev
+    - uat
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  variables:
+    DOCKER_TLS_CERT_DIR: /cert
+
+  before_script:
+    - docker login -u $REGISTRY_USER --password-stdin <<< $REGISTRY_PASS
+  script:
+    - docker build --no-cache  --build-arg VITE_PERSISTOR_KEY=$VITE_PERSISTOR_KEY --build-arg VITE_TOKEN_KEY=$VITE_TOKEN_KEY  -f Dockerfile -t $IMAGE_NAME_HYUNDAI_UI_DEV:$IMAGE_TAG .
+    - docker push $IMAGE_NAME_HYUNDAI_UI_DEV:$IMAGE_TAG
+    - docker rmi $IMAGE_NAME_HYUNDAI_UI_DEV:$IMAGE_TAG || true
+    - docker images -q --filter "dangling=true" | xargs docker rmi || true
+deploy:
+  stage: deploy
+  only:
+    - dev
+    - uat
+  before_script:
+    - chmod 400 $MISC_SSH_KEY
+  script:
+    - echo $(ssh -o StrictHostKeyChecking=no -i $MISC_SSH_KEY $MISC_DEV_SERVER "bash /home/ubuntu/stop_container.sh 7007")
+    - ssh -o StrictHostKeyChecking=no -i $MISC_SSH_KEY $MISC_DEV_SERVER "
+      docker login -u $REGISTRY_USER -p '$REGISTRY_PASS' &&
+      docker run --pull always  -d -p 7007:7007 $IMAGE_NAME_HYUNDAI_UI_DEV:$IMAGE_TAG &&
+      docker images -q --filter "dangling=true" | xargs docker rmi || true"

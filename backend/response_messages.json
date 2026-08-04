@@ -1,0 +1,9 @@
+{
+    "api_key_generated": "API key generated successfully",
+    "api_key_fetched": "API key fetched successfully",
+    "user_signed_up": "User signed up successfully",
+    "user_logged_in": "User logged in successfully",
+    "instance_created": "Instance created successfully",
+    "record_fetched": "Record fetched successfully",
+    "record_deleted": "Record deleted successfully"
+}

@@ -1,0 +1,43 @@
+node {
+  
+  try {
+    stage('Checkout') {
+      checkout scm
+    }
+    stage('Environment') {
+      sh 'git --version'
+      echo "Branch: ${env.BRANCH_NAME}"
+      sh 'docker -v'
+      sh 'printenv'
+    }
+
+    // stage('Install'){
+    //  sh 'npm install'
+    // }
+
+
+    // stage('Build'){
+    //  sh 'npm run build'
+    // }
+
+    //  stage('Deploy'){
+    //  sh 'npm start'
+    // }
+
+      stage('Remove Existing Container') {
+        sh 'docker stop idp || true'
+        sh 'docker rm idp || true'
+        sh 'docker stop idp-fe || true'
+        sh 'docker rm idp-fe || true'
+      }
+      stage('Build Docker Image') {
+          sh 'docker build -t idp-frontend:latest -f Dockerfile --no-cache .'
+        }
+      stage('Run Docker Container') {
+          sh 'docker run -d --rm -p 8082:8082 --name idp-fe idp-frontend:latest'
+      }
+  }
+  catch (err) {
+    throw err
+  }
+}

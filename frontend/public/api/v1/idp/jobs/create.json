@@ -1,0 +1,16 @@
+{
+  "data": {
+    "_id": "1234XXXX",
+    "status": "Completed|In Progress|Failed",
+    "job_start": "12/10/2023 02:33:15",
+    "job_end": "12/10/2023 02:33:15",
+    "job_created": "12/10/2023 02:33:15",
+    "created_by": "7f8h34uhfuhdiwu4h3uhf",
+    "process": "single|batch",
+    "source": "https://bsl-idp.s3.ap-south-1.amazonaws.com/1707270511/input/dummy.pdf",
+    "extract": ["line", "forms", "table", "signature", "barcode"],
+    "output": {}
+  },
+  "message": "Job Ccompleted",
+  "status": 200
+}
