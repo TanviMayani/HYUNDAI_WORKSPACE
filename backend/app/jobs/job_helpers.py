@@ -1210,7 +1210,9 @@ class DocumentProcessingService:
                 JobDocumentService.process_job_completion(job_id, db)
                 
         except Exception as e:
-            logger(level='CRITICAL', status_code=500, message=f"Error extracting data: {e}", endpoint='extract_data')
+            import traceback
+            tb_str = traceback.format_exc()
+            logger(level='CRITICAL', status_code=500, message=f"Error extracting data: {e}\nTraceback:\n{tb_str}", endpoint='extract_data')
             document_data = db.query(ModelDocuments).filter(ModelDocuments.document_id == document_id).first()
             if document_data:
                 setattr(document_data, "status", Status.Failed)

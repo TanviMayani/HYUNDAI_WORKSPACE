@@ -1,4 +1,4 @@
-const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000/v1/hiib";
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8002/v1/hiib";
 
 export const COMMON_API_URL = {
   baseUrl: backendUrl,

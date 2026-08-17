@@ -54,7 +54,7 @@ class DocumentLLMService:
     """
 
     def __init__(self):
-        load_dotenv()
+        load_dotenv(override=True)
         self.error_details = load_error_details("error_details.json")
         self.BUCKET_NAME = os.getenv("BINARY_BUCKET_NAME")
         self.use_external_llm = False
@@ -493,6 +493,7 @@ class DocumentLLMService:
                                             {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{base64.b64encode(image_bytes).decode('utf-8')}"}}
                                         ]}
                                     ],
+                                    max_tokens=4096,
                                 )
                             else:
                                 import easyocr
@@ -508,6 +509,7 @@ class DocumentLLMService:
                                         {"role": "system", "content": self.SYSTEM_PROMPT},
                                         {"role": "user", "content": f"Here is the OCR text of the document. Extract the structured fields from it: {ocr_text}"}
                                     ],
+                                    max_tokens=4096,
                                 )
                             
                             response_text = response.choices[0].message.content
@@ -525,6 +527,8 @@ class DocumentLLMService:
                             mapped_data = self.map_invoice_data(response_text)
                             if mapped_data:
                                 return mapped_data, prompt_tokens, completion_tokens
+                            else:
+                                logger(level="WARNING", status_code=200, message=f"Failed to parse LLM response JSON. Raw response: {response_text}", endpoint="generate_response")
                         except Exception as provider_error:
                             logger(level="WARNING", status_code=200, message=f"External LLM request failed for Groq/Grok: {provider_error}; falling back to local mode.", endpoint="generate_response")
 

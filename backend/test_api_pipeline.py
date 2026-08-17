@@ -5,7 +5,7 @@ import requests
 import fitz
 
 # Set up local server URL
-BASE_URL = "http://127.0.0.1:8000/v1/hiib"
+BASE_URL = "http://127.0.0.1:8002/v1/hiib"
 
 def create_mock_invoice_pdf():
     """Generates a mock invoice PDF for testing the LLM extraction."""

@@ -27,6 +27,16 @@ def logger(level, status_code, message, endpoint, traceback_id=None):
 
     formatted_log = f'{formatted_time} {json.dumps(log_data)[1:-1]}'
 
+    if level == 'CRITICAL':
+        import traceback
+        import sys
+        if sys.exc_info()[0] is not None:
+            tb_str = traceback.format_exc()
+            formatted_log += f'\n=== ACTIVE EXCEPTION TRACEBACK ===\n{tb_str}=================================='
+            print("\n=== ACTIVE EXCEPTION TRACEBACK ===", flush=True)
+            print(tb_str, end="", flush=True)
+            print("==================================\n", flush=True)
+
     with open(log_file_path, 'a') as log_file:
         log_file.write(formatted_log + '\n')
 

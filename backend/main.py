@@ -19,7 +19,7 @@ from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 request_limit = os.getenv("REQUEST_LIMIT", "10")
 limiter = Limiter(key_func=get_remote_address, default_limits=[f"{request_limit}/second"])
